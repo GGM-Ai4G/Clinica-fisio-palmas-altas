@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Demo navegable de gestión para Clínica Fisio Palmas Altas">
+  <title>Clínica Fisio Palmas Altas · Demo AI4G</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <a class="brand" href="#direccion" aria-label="Ir al panel de dirección">
+        <span class="brand-mark">FP</span>
+        <span><strong>Fisio Palmas</strong><small>Clínica & movimiento</small></span>
+      </a>
+      <nav class="nav-list" id="nav-list">
+        <button class="nav-item active" data-page="direccion"><span>◫</span> Dirección</button>
+        <button class="nav-item" data-page="agenda"><span>▦</span> Agenda</button>
+        <button class="nav-item" data-page="pacientes"><span>◎</span> Pacientes</button>
+        <button class="nav-item" data-page="bonos"><span>◇</span> Bonos y cobros</button>
+        <button class="nav-item" data-page="crm"><span>⌁</span> CRM comercial <b class="nav-count">7</b></button>
+        <button class="nav-item" data-page="automatizaciones"><span>✦</span> Automatizaciones</button>
+        <button class="nav-item ai-nav" data-page="ia"><span>✣</span> Asistente AI4G</button>
+        <button class="nav-item" data-page="portal"><span>▣</span> Portal paciente</button>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="demo-note"><b>Entorno demo</b><span>Datos 100% ficticios</span></div>
+        <div class="profile"><span class="avatar">LM</span><span><b>Laura Moreno</b><small>Dirección</small></span><button aria-label="Opciones">•••</button></div>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobile-menu" aria-label="Abrir menú">☰</button>
+        <div><p class="eyebrow">Clínica Fisio Palmas Altas</p><h1 id="page-title">Panel de dirección</h1></div>
+        <div class="top-actions">
+          <span class="period-chip">Este mes⌄</span>
+          <button class="icon-button" aria-label="Notificaciones">♢<i></i></button>
+          <button class="primary-button" id="quick-action">+ Nueva cita</button>
+        </div>
+      </header>
+      <section id="app-content" class="content" aria-live="polite"></section>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <div class="modal-backdrop" id="modal-backdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button class="modal-close" id="modal-close" aria-label="Cerrar">×</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
