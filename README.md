@@ -5,13 +5,13 @@ Demo navegable de una plataforma integral para una clínica de fisioterapia y en
 ## Qué incluye
 
 - Panel de dirección con facturación, ocupación, margen y rentabilidad por servicio.
-- Agenda combinada de citas individuales, clases, profesionales y salas.
+- Agenda combinada con calendarios diferenciados y filtros para fisioterapia, suelo pélvico, Pilates, funcional y embarazo.
 - Gestión de pacientes e historia clínica con plantillas por especialidad.
 - Bonos, cuotas, pagos y control de impagos.
 - CRM comercial con origen de contactos y embudo de conversión.
 - Automatizaciones de listas de espera, renovaciones y reactivación.
 - Asistente AI4G con recomendaciones basadas en los datos ficticios de la demo.
-- Portal móvil del paciente para reservas, bonos y ejercicios.
+- Acceso desde la ficha clínica al portal móvil del paciente, con selección de clase, validación de bono y confirmación de reserva.
 
 ## Ejecutar en local
 

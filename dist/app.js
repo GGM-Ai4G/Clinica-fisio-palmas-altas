@@ -16,6 +16,7 @@ const toast = document.getElementById("toast");
 const modalBackdrop = document.getElementById("modal-backdrop");
 const modalContent = document.getElementById("modal-content");
 let currentPage = "direccion";
+let portalPatientIndex = 0;
 
 const euros = n => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 
@@ -63,11 +64,20 @@ function directionPage() {
 function agendaPage() {
   const rows = ["08:00","09:00","10:00","11:00","12:00","16:00","17:00","18:00","19:00"];
   const events = {
-    "0-0":["Fisio deportiva","Miguel Santos"], "0-2":["Suelo pélvico","Ana Ríos","pelvic"], "1-1":["Pilates terapéutico","8/10 plazas","class"], "1-3":["Fisio general","Carmen Díaz"], "2-0":["Valoración inicial","María León"], "2-4":["Entrenamiento funcional","10/12 plazas","class"], "3-2":["Embarazo y posparto","Lucía Vega","pelvic"], "4-1":["Fisio deportiva","Javier Alba"], "5-3":["Pilates terapéutico","10/10 · espera 3","class"], "6-0":["Fisio general","Rosa Martín"], "6-4":["Entrenamiento personal","David Gil","class"], "7-2":["Suelo pélvico","Eva Cano","pelvic"], "8-1":["Pilates máquinas","9/10 plazas","class"]
+    "0-0":["Fisio deportiva","Miguel Santos","fisio"], "0-2":["Suelo pélvico","Ana Ríos","pelvic"], "1-1":["Pilates terapéutico","8/10 plazas","pilates"], "1-3":["Fisio general","Carmen Díaz","fisio"], "2-0":["Valoración inicial","María León","fisio"], "2-4":["Entrenamiento funcional","10/12 plazas","functional"], "3-2":["Embarazo y posparto","Lucía Vega","pregnancy"], "4-1":["Fisio deportiva","Javier Alba","fisio"], "5-3":["Pilates terapéutico","10/10 · espera 3","pilates"], "6-0":["Fisio general","Rosa Martín","fisio"], "6-4":["Entrenamiento personal","David Gil","functional"], "7-2":["Suelo pélvico","Eva Cano","pelvic"], "8-1":["Pilates máquinas","9/10 plazas","pilates"]
   };
   let cells = `<div class="day-head"></div>${["Lun 23","Mar 24","Mié 25","Jue 26","Vie 27"].map(x=>`<div class="day-head">${x}</div>`).join("")}`;
-  rows.forEach((t,r)=>{ cells += `<div class="time">${t}</div>`; for(let c=0;c<5;c++){ const e=events[`${r}-${c}`]; cells += `<div>${e?`<div class="event ${e[2]||""}"><strong>${e[0]}</strong>${e[1]}</div>`:""}</div>`; }});
-  return `<div class="toolbar"><div class="segmented"><button class="active">Semana</button><button>Día</button><button>Lista</button></div><button class="filter">‹ 23–27 noviembre ›</button><button class="filter">Todos los profesionales ⌄</button><button class="filter">Todas las salas ⌄</button></div>
+  rows.forEach((t,r)=>{ cells += `<div class="time">${t}</div>`; for(let c=0;c<5;c++){ const e=events[`${r}-${c}`]; cells += `<div>${e?`<button class="event ${e[2]}" data-activity="${e[2]}" data-event-title="${e[0]}"><strong>${e[0]}</strong>${e[1]}</button>`:""}</div>`; }});
+  return `<div class="section-head calendar-heading"><div><h2>Calendarios por actividad</h2><p>Selecciona una línea de actividad para ver únicamente sus profesionales, salas y sesiones.</p></div><span class="calendar-context" id="calendar-context-title">Vista conjunta · 13 sesiones</span></div>
+    <div class="calendar-switcher" role="group" aria-label="Seleccionar calendario">
+      <button class="calendar-choice active all" data-calendar-filter="all"><i></i><span><b>Todos</b><small>13 sesiones</small></span></button>
+      <button class="calendar-choice fisio" data-calendar-filter="fisio"><i></i><span><b>Fisioterapia</b><small>5 sesiones · 89%</small></span></button>
+      <button class="calendar-choice pelvic" data-calendar-filter="pelvic"><i></i><span><b>Suelo pélvico</b><small>2 sesiones · 82%</small></span></button>
+      <button class="calendar-choice pilates" data-calendar-filter="pilates"><i></i><span><b>Pilates</b><small>3 clases · espera 3</small></span></button>
+      <button class="calendar-choice functional" data-calendar-filter="functional"><i></i><span><b>Funcional</b><small>2 clases · 76%</small></span></button>
+      <button class="calendar-choice pregnancy" data-calendar-filter="pregnancy"><i></i><span><b>Embarazo</b><small>1 sesión · 70%</small></span></button>
+    </div>
+    <div class="toolbar"><div class="segmented"><button class="active">Semana</button><button>Día</button><button>Lista</button></div><button class="filter">23–27 noviembre</button><button class="filter">Todos los profesionales</button><button class="filter">Todas las salas</button></div>
     <article class="card agenda-shell"><div class="agenda-grid">${cells}</div></article>
     <div class="grid agenda-summary"><div class="summary-chip"><b>84%</b><span>Ocupación semanal</span></div><div class="summary-chip"><b>3</b><span>Personas en lista de espera</span></div><div class="summary-chip"><b>2</b><span>Huecos disponibles hoy</span></div></div>`;
 }
@@ -77,7 +87,7 @@ const patients = [
 ];
 function patientDetail(index=0) {
   const p=patients[index];
-  return `<div class="patient-header"><span class="patient-avatar">${p[1]}</span><div><h2>${p[0]}</h2><p>Paciente #00${124+index} · ${p[2]}</p></div><div class="actions"><button class="secondary-button">Enviar mensaje</button><button class="primary-button" data-modal="session">+ Nueva sesión</button></div></div>
+  return `<div class="patient-header"><span class="patient-avatar">${p[1]}</span><div><h2>${p[0]}</h2><p>Paciente #00${124+index} · ${p[2]}</p></div><div class="actions"><button class="patient-portal-button" data-patient-portal="${index}">Entrar como paciente</button><button class="secondary-button">Enviar mensaje</button><button class="primary-button" data-modal="session">+ Nueva sesión</button></div></div>
     <div class="record-tabs"><button class="active">Resumen</button><button>Historia clínica</button><button>Documentos</button><button>Comunicaciones</button><button>Facturación</button></div>
     <div class="grid record-grid"><div class="info-box"><span>Próxima cita</span><b>25 nov · 10:00</b></div><div class="info-box"><span>Profesional</span><b>Laura Moreno</b></div><div class="info-box"><span>Plantilla clínica</span><b>${index===0?"PERFECT · Suelo pélvico":"Fisioterapia general"}</b></div><div class="info-box"><span>Objetivo</span><b>Recuperación funcional</b></div><div class="info-box"><span>Sesiones</span><b>5 de 8 completadas</b></div><div class="info-box"><span>Consentimientos</span><b>Firmados · 12/11/26</b></div></div>
     <div class="timeline"><div class="timeline-item"><b>18 nov · Evolución favorable</b><p>Mejora de síntomas y adherencia al programa domiciliario. Se mantienen pautas y progresión.</p></div><div class="timeline-item"><b>11 nov · Valoración sucesiva</b><p>Escala registrada en plantilla específica. Documento firmado por profesional.</p></div><div class="timeline-item"><b>04 nov · Valoración inicial</b><p>Objetivos terapéuticos definidos y consentimiento informado registrado.</p></div></div>`;
@@ -120,8 +130,10 @@ function iaPage() {
 }
 
 function portalPage() {
-  return `<div class="portal-wrap"><div class="phone"><div class="phone-screen"><div class="phone-top"><div class="hello"><div><p>Buenos días</p><h2>Hola, María</h2></div><span class="patient-avatar">ML</span></div></div><div class="phone-content"><div class="next-appointment"><small>PRÓXIMA CITA</small><h3>Suelo pélvico</h3><p>Miércoles 25 · 10:00 · Laura Moreno</p></div><div class="phone-actions"><button class="phone-action" data-portal="reserve"><span>＋</span>Reservar</button><button class="phone-action" data-portal="package"><span>◇</span>Mis bonos</button><button class="phone-action" data-portal="exercise"><span>✓</span>Ejercicios</button></div><div class="mobile-card"><h4>Próximas clases</h4><div class="class-row"><span class="class-date">MAR<br>24</span><span><b>Pilates terapéutico</b><small>18:00 · 2 plazas</small></span><button data-portal="reserve-class">Reservar</button></div></div><div class="mobile-card"><h4>Tu bono de fisioterapia</h4><div class="progress"><i style="width:60%"></i></div><div class="package-meta"><span>6 usadas</span><b>4 disponibles</b></div></div><div class="mobile-card"><h4>Programa en casa · 60%</h4><div class="class-row"><span class="class-date">✓</span><span><b>Respiración diafragmática</b><small>3 series · hoy</small></span><button data-portal="done">Hecho</button></div></div></div></div></div>
-    <div class="portal-copy"><p class="eyebrow">Experiencia integrada</p><h2>Todo lo que el paciente necesita, desde el móvil</h2><p>Una experiencia clara y con la imagen de la clínica, conectada en tiempo real con agenda, clases, bonos y documentación.</p><div class="feature-check"><i>✓</i><div><b>Reserva sin llamadas</b><span>Elegir servicio, profesional y horario; cancelar según las reglas del centro.</span></div></div><div class="feature-check"><i>✓</i><div><b>Bonos, pagos y facturas</b><span>Compra simulada, consumo de sesiones y avisos antes de la renovación.</span></div></div><div class="feature-check"><i>✓</i><div><b>Seguimiento en casa</b><span>Ejercicios, vídeos y progreso compartidos por el profesional.</span></div></div><div class="feature-check"><i>✓</i><div><b>Privacidad desde el diseño</b><span>Consentimientos separados, acceso seguro y mínima información necesaria.</span></div></div></div></div>`;
+  const p = patients[portalPatientIndex] || patients[0];
+  const firstName = p[0].split(" ")[0];
+  return `<div class="patient-mode-banner"><span>Vista del paciente</span><b>${p[0]}</b><button data-page="pacientes">Volver a la ficha clínica</button></div><div class="portal-wrap"><div class="phone"><div class="phone-screen"><div class="phone-top"><div class="hello"><div><p>Buenos días</p><h2>Hola, ${firstName}</h2></div><span class="patient-avatar">${p[1]}</span></div></div><div class="phone-content"><div class="next-appointment"><small>PRÓXIMA CITA</small><h3>Suelo pélvico</h3><p>Miércoles 25 · 10:00 · Laura Moreno</p></div><div class="phone-actions"><button class="phone-action" data-portal="reserve-class"><span>＋</span>Reservar clase</button><button class="phone-action" data-portal="package"><span>◇</span>Mis bonos</button><button class="phone-action" data-portal="exercise"><span>✓</span>Ejercicios</button></div><div class="mobile-card"><h4>Clases disponibles</h4><div class="class-row"><span class="class-date">MAR<br>24</span><span><b>Pilates terapéutico</b><small>18:00 · 2 plazas</small></span><button data-portal="reserve-class">Reservar</button></div></div><div class="mobile-card"><h4>Tu bono de fisioterapia</h4><div class="progress"><i style="width:60%"></i></div><div class="package-meta"><span>6 usadas</span><b>4 disponibles</b></div></div><div class="mobile-card"><h4>Programa en casa · 60%</h4><div class="class-row"><span class="class-date">✓</span><span><b>Respiración diafragmática</b><small>3 series · hoy</small></span><button data-portal="done">Hecho</button></div></div></div></div></div>
+    <div class="portal-copy"><p class="eyebrow">Experiencia integrada</p><h2>Reserva una clase como ${firstName}</h2><p>Entra desde la ficha clínica, consulta las plazas reales de cada calendario y confirma una reserva utilizando su bono activo.</p><button class="primary-button booking-cta" data-book-class>Probar reserva de clase</button><div class="feature-check"><i>✓</i><div><b>Calendarios separados</b><span>Pilates, funcional, embarazo y otras actividades muestran sus propios horarios y aforos.</span></div></div><div class="feature-check"><i>✓</i><div><b>Validación del bono</b><span>Antes de confirmar, la demo comprueba las sesiones disponibles del paciente.</span></div></div><div class="feature-check"><i>✓</i><div><b>Confirmación inmediata</b><span>La plaza queda reflejada en la agenda y en las próximas clases del paciente.</span></div></div></div></div>`;
 }
 
 const renderers = { direccion: directionPage, agenda: agendaPage, pacientes: pacientesPage, bonos: bonosPage, crm: crmPage, automatizaciones: automatizacionesPage, ia: iaPage, portal: portalPage };
@@ -148,6 +160,18 @@ function openModal(type) {
   modalBackdrop.hidden = false;
 }
 
+function openBookingModal() {
+  const p = patients[portalPatientIndex] || patients[0];
+  modalContent.innerHTML = `<div class="booking-step-label">RESERVA DE CLASE · 1 DE 2</div><h2 id="modal-title">Elige una clase para ${p[0]}</h2><p>Las plazas se consultan en el calendario de cada actividad. La reserva utilizará una sesión del bono activo.</p>
+    <div class="booking-class-list">
+      <button class="class-option selected" data-class-option="Pilates terapéutico · martes 24, 18:00"><i class="pilates"></i><span><b>Pilates terapéutico</b><small>Martes 24 · 18:00 · Sala Olivo</small></span><em>2 plazas</em></button>
+      <button class="class-option" data-class-option="Entrenamiento funcional · miércoles 25, 19:00"><i class="functional"></i><span><b>Entrenamiento funcional</b><small>Miércoles 25 · 19:00 · Sala Aljarafe</small></span><em>2 plazas</em></button>
+      <button class="class-option" data-class-option="Embarazo activo · jueves 26, 17:00"><i class="pregnancy"></i><span><b>Embarazo activo</b><small>Jueves 26 · 17:00 · Sala Luz</small></span><em>4 plazas</em></button>
+    </div>
+    <div class="booking-summary"><span>Bono disponible</span><b>4 sesiones restantes</b></div><button class="primary-button booking-confirm" data-confirm-booking>Confirmar reserva</button>`;
+  modalBackdrop.hidden = false;
+}
+
 function aiAnswer(prompt) {
   const p = prompt.toLowerCase();
   if (p.includes("15") || p.includes("factur")) return `<strong>Plan para crecer un 15%</strong>Con los datos de la demo, el objetivo equivale a <b>5.763 € adicionales al mes</b>.<ul><li>Abrir una clase de Pilates el martes a las 18:00: +680 €/mes.</li><li>Cubrir 11 huecos cancelados con la lista de espera: +528 €/mes.</li><li>Ofrecer funcional a 17 pacientes que reciben el alta: potencial +1.173 €/mes.</li><li>Reactivar 24 pacientes con consentimiento vigente: potencial +1.440 €/mes.</li></ul>El resto exige aumentar ocupación en franjas valle y revisar precios. Recomiendo medir cada acción durante 4 semanas.`;
@@ -161,10 +185,16 @@ document.addEventListener("click", e => {
   const go = e.target.closest("[data-go]"); if (go) return showPage(go.dataset.go);
   if (e.target.closest("#mobile-menu")) return document.querySelector(".sidebar").classList.toggle("open");
   const pBtn = e.target.closest("[data-patient]"); if (pBtn) { document.querySelectorAll(".patient-item").forEach(x=>x.classList.remove("active")); pBtn.classList.add("active"); document.getElementById("patient-detail").innerHTML=patientDetail(Number(pBtn.dataset.patient)); return; }
+  const patientPortal=e.target.closest("[data-patient-portal]"); if(patientPortal){portalPatientIndex=Number(patientPortal.dataset.patientPortal);showPage("portal");return;}
+  const calendarFilter=e.target.closest("[data-calendar-filter]"); if(calendarFilter){const filter=calendarFilter.dataset.calendarFilter;document.querySelectorAll(".calendar-choice").forEach(x=>x.classList.toggle("active",x===calendarFilter));document.querySelectorAll(".event[data-activity]").forEach(x=>x.hidden=filter!=="all"&&x.dataset.activity!==filter);const labels={all:"Vista conjunta · 13 sesiones",fisio:"Calendario de Fisioterapia · 5 sesiones",pelvic:"Calendario de Suelo pélvico · 2 sesiones",pilates:"Calendario de Pilates · 3 clases",functional:"Calendario de Funcional · 2 clases",pregnancy:"Calendario de Embarazo · 1 sesión"};document.getElementById("calendar-context-title").textContent=labels[filter];return;}
   const toggle=e.target.closest(".toggle"); if(toggle){toggle.classList.toggle("on");showToast(toggle.classList.contains("on")?"Automatización activada":"Automatización pausada");return;}
   const adv=e.target.closest(".advance-lead"); if(adv){adv.closest(".lead").style.opacity=".45";showToast("Oportunidad avanzada a la siguiente fase");return;}
   const prompt=e.target.closest("[data-prompt]"); if(prompt){const chat=document.getElementById("chat-window");const input=document.getElementById("ai-input");input.value=prompt.dataset.prompt;sendAi();return;}
-  const portal=e.target.closest("[data-portal]"); if(portal){ const msgs={reserve:"Abriendo agenda disponible…",package:"Bono: 4 sesiones disponibles",exercise:"Programa de ejercicios abierto", "reserve-class":"Plaza reservada · Pilates, martes 18:00",done:"Ejercicio marcado como completado"}; showToast(msgs[portal.dataset.portal]); return; }
+  const classOption=e.target.closest("[data-class-option]");if(classOption){document.querySelectorAll(".class-option").forEach(x=>x.classList.remove("selected"));classOption.classList.add("selected");return;}
+  if(e.target.closest("[data-confirm-booking]")){const selected=document.querySelector(".class-option.selected");modalContent.innerHTML=`<div class="booking-success"><span>✓</span><h2>Reserva confirmada</h2><p>${selected?.dataset.classOption||"Clase seleccionada"}</p><div class="booking-confirmation-meta"><b>${(patients[portalPatientIndex]||patients[0])[0]}</b><small>Se ha descontado 1 sesión · quedan 3</small></div><button class="primary-button" data-booking-done>Volver al portal</button></div>`;showToast("Clase reservada correctamente");return;}
+  if(e.target.closest("[data-booking-done]")){modalBackdrop.hidden=true;return;}
+  if(e.target.closest("[data-book-class]")){openBookingModal();return;}
+  const portal=e.target.closest("[data-portal]"); if(portal){ if(portal.dataset.portal==="reserve-class"){openBookingModal();return;} const msgs={package:"Bono: 4 sesiones disponibles",exercise:"Programa de ejercicios abierto",done:"Ejercicio marcado como completado"}; showToast(msgs[portal.dataset.portal]); return; }
   if(e.target.closest("[data-modal]")) return openModal(e.target.closest("[data-modal]").dataset.modal);
   if(e.target.id==="modal-close") modalBackdrop.hidden=true;
   if(e.target.id==="modal-save"){modalBackdrop.hidden=true;showToast("Guardado correctamente en la demo");}
